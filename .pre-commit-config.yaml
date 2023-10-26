@@ -1,0 +1,69 @@
+repos:
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: remove-tabs
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      - id: check-ast
+      - id: fix-byte-order-marker
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/psf/black
+    rev: "23.10.1"
+    hooks:
+      - id: black
+        args: ["--line-length=120"]
+
+  # - repo: https://github.com/tomcatling/black-nb
+  #   rev: "0.7"
+  #   hooks:
+  #     - id: black-nb
+  #       args: ["--line-length=120"]
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: "6.1.0"
+    hooks:
+      - id: flake8
+        additional_dependencies: ["pep8-naming"]
+        # Ignore all format-related checks as Black takes care of those.
+        args:
+          [
+            "--ignore",
+            "E2,W5,D100,D101",
+            "--select",
+            "E,W,F,N",
+            "--max-line-length=120",
+          ]
+
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-iii", "-ll"]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--resolve-all-configs"]
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: 3.12.0
+    hooks:
+      - id: commitizen
