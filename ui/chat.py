@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+#
+
 import gradio as gr
-from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
@@ -12,27 +15,22 @@ def user(message, history):
 
 def bot(history):
     user_message = history[-1][0]
-    new_user_input_ids = tokenizer.encode(
-        user_message + tokenizer.eos_token, return_tensors="pt"
-    )
+    new_user_input_ids = tokenizer.encode(user_message + tokenizer.eos_token, return_tensors="pt")
 
     # append the new user input tokens to the chat history
     bot_input_ids = torch.cat([torch.LongTensor([]), new_user_input_ids], dim=-1)
 
     # generate a response
-    response = model.generate(
-        bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id
-    ).tolist()
+    response = model.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id).tolist()
 
     # convert the tokens to text, and then split the responses into lines
     response = tokenizer.decode(response[0]).split("<|endoftext|>")
-    response = [
-        (response[i], response[i + 1]) for i in range(0, len(response) - 1, 2)
-    ]  # convert to tuples of list
+    response = [(response[i], response[i + 1]) for i in range(0, len(response) - 1, 2)]  # convert to tuples of list
     history[-1] = response[0]
     return history
 
-html = '''
+
+html = """
    <div class="star-rating" onclick="console.log('you clicked me');">
         <input type="radio" id="5-stars" name="rating" value="5"  onclick="ratingFn(5)" />
         <label for="5-stars" class="star">&#9733;</label>
@@ -45,7 +43,7 @@ html = '''
         <input type="radio" id="1-star" name="rating" value="1"  onclick="ratingFn(1)" />
         <label for="1-star" class="star">&#9733;</label>
     </div>
-'''
+"""
 
 scripts = """
 async () => {
@@ -56,12 +54,12 @@ async () => {
 }
 """
 
-css = '''
+css = """
 /* component */
 
 .star-rating {
   /*  border: solid 1px #ccc; */
-    
+
     display: flex;
     flex-direction: row-reverse;
     font-size: 1.5em;
@@ -104,10 +102,12 @@ article {
     max-width: 30em;
     padding: 2em;
 }
-'''
+"""
+
 
 def rating(rating):
     return f"Rating is, {rating}!"
+
 
 with gr.Blocks(css=css) as demo:
     chatbot = gr.Chatbot()
@@ -116,11 +116,9 @@ with gr.Blocks(css=css) as demo:
     radio_buttons = gr.HTML(html)
     rating_text = gr.Textbox(label="Rating", elem_id="rating_text")
     # radio_buttons.change(fn=rating, inputs=rating_text, outputs=rating_text)
-    demo.load(None,None,None,_js=scripts)
+    demo.load(None, None, None, _js=scripts)
 
-    msg.submit(user, [msg, chatbot], [msg, chatbot], queue=False).then(
-        bot, chatbot, chatbot
-    )
+    msg.submit(user, [msg, chatbot], [msg, chatbot], queue=False).then(bot, chatbot, chatbot)
     clear.click(lambda: None, None, chatbot, queue=False)
 
 demo.launch()
